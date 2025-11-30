@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amharic Bible Verse Cards</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --light-color: #ecf0f1;
+        }
+        
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Nyala', 'Abyssinica SIL', 'Segoe UI', sans-serif;
+            background: white;
+            width: 100%;
+            min-height: 100vh;
+            margin: 0 auto;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 21cm;
+            margin: 0 auto;
+        }
+        
+        .page {
+            width: 100%;
+            height: 29.7cm;
+            min-height: 29.7cm;
+            background: white;
+            position: relative;
+        }
+        
+        .cutting-guides {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+        
+        .vertical-guide {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 0;
+            height: 100%;
+            border-left: 1px dashed #e69595;
+        }
+        
+        .horizontal-guide {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 0;
+            border-top: 1px dashed #e2a0a0;
+        }
+        
+        .guide-1 { top: 20%; }
+        .guide-2 { top: 40%; }
+        .guide-3 { top: 60%; }
+        .guide-4 { top: 80%; }
+        
+        .corner-mark {
+            position: absolute;
+            width: 5mm;
+            height: 5mm;
+            border: 1px solid #ff0000;
+            background: white;
+        }
+        
+        .top-left { top: 5mm; left: 5mm; border-right: none; border-bottom: none; }
+        .top-right { top: 5mm; right: 5mm; border-left: none; border-bottom: none; }
+        .bottom-left { bottom: 5mm; left: 5mm; border-right: none; border-top: none; }
+        .bottom-right { bottom: 5mm; right: 5mm; border-left: none; border-top: none; }
+        
+        .cards-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: repeat(5, 1fr);
+            width: 100%;
+            height: 100%;
+            padding: 5mm;
+            gap: 1mm;
+        }
+        
+        .card {
+            border: 1px solid #ddd;
+            padding: 3mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: white;
+            page-break-inside: avoid;
+            border-radius: 4px;
+        }
+        
+        .card-title {
+            font-weight: bold;
+            font-size: clamp(12pt, 3vw, 14pt);
+            margin-bottom: 2mm;
+            color: #2c3e50;
+            line-height: 1.2;
+        }
+        
+        .card-content {
+            font-size: clamp(10pt, 2.5vw, 12pt);
+            line-height: 1.4;
+            color: #34495e;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Mobile-optimized Controls */
+        .controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.98);
+            padding: 15px;
+            border-top: 2px solid var(--primary-color);
+            z-index: 1000;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .controls h3 {
+            margin: 0 0 10px 0;
+            color: var(--primary-color);
+            text-align: center;
+            font-size: clamp(16px, 4vw, 18px);
+        }
+        
+        .counter {
+            text-align: center;
+            margin-bottom: 12px;
+            font-weight: bold;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: clamp(14px, 3.5vw, 16px);
+        }
+        
+        .counter.normal {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .counter.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .counter.full {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .input-group {
+            margin-bottom: 12px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: bold;
+            font-size: clamp(14px, 3.5vw, 16px);
+            color: var(--primary-color);
+        }
+        
+        .controls input, .controls textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #bdc3c7;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: clamp(14px, 4vw, 16px);
+            background: white;
+        }
+        
+        .controls input:focus, .controls textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .controls textarea {
+            height: 100px;
+            resize: vertical;
+            line-height: 1.4;
+        }
+        
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .controls button {
+            padding: 12px;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            background: var(--primary-color);
+            color: white;
+            font-family: inherit;
+            font-size: clamp(14px, 3.5vw, 16px);
+            font-weight: 600;
+            min-height: 44px;
+        }
+        
+        .controls button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        .controls button.clear {
+            background: var(--danger-color);
+        }
+        
+        .controls button.print {
+            background: var(--success-color);
+        }
+        
+        .mobile-toggle {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 999;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        /* Enhanced Print Styles for Android Chrome */
+        @media print {
+            /* Hide everything except the page and cards */
+            body * {
+                visibility: hidden;
+            }
+            
+            .container,
+            .container *,
+            .page,
+            .page *,
+            .cards-grid,
+            .cards-grid *,
+            .card,
+            .card * {
+                visibility: visible;
+            }
+            
+            /* Position the printable area properly */
+            .container {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            
+            .page {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 21cm;
+                height: 29.7cm;
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+                background: white;
+            }
+            
+            /* Ensure controls are completely hidden */
+            .controls,
+            .mobile-toggle,
+            .controls *,
+            .mobile-toggle * {
+                display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+                height: 0 !important;
+                width: 0 !important;
+                overflow: hidden !important;
+                position: absolute !important;
+                left: -9999px !important;
+            }
+            
+            /* Style cards for print */
+            .card {
+                border: 1px solid #000;
+                background: white;
+                color: black;
+                box-shadow: none;
+                margin: 0;
+            }
+            
+            .card-title {
+                color: black;
+            }
+            
+            .card-content {
+                color: black;
+            }
+            
+            /* Ensure cutting guides are visible */
+            .cutting-guides,
+            .vertical-guide,
+            .horizontal-guide,
+            .corner-mark {
+                visibility: visible;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .controls {
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                bottom: auto;
+                left: auto;
+                width: 350px;
+                border: 2px solid var(--primary-color);
+                border-radius: 8px;
+            }
+            
+            .mobile-toggle {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Toggle Button -->
+    <button class="mobile-toggle" onclick="toggleControls()">⚙️</button>
+
+    <!-- Control Panel -->
+    <div class="controls" id="controlsPanel">
+        <h3>መጠጥ ቅዱስ ጥቅሶች</h3>
+        
+        <div class="counter normal" id="verseCounter">
+            ጥቅሶች: 0/10
+        </div>
+        
+        <div class="input-group">
+            <label for="verseTitle">ርዕስ (Title):</label>
+            <input type="text" id="verseTitle" placeholder="ለምሳሌ: Evan Week (Mon - Fri)" value="Evan Week (Mon - Fri)">
+        </div>
+        
+        <div class="input-group">
+            <label for="verseContent">ጥቅስ (Verse):</label>
+            <textarea id="verseContent" placeholder="ጥቅሱን እዚህ ግበሩ...
+ለምሳሌ:
+&quot;ክርስቶስ ይህን መከራ ይቀበል ዘንድና ወደ ክብሩ ይገባ ዘንድ ይገባው የለምን? አላቸው።&quot;"></textarea>
+        </div>
+        
+        <div class="button-group">
+            <button onclick="addVerse()" id="addButton">ጥቅስ ጨምር</button>
+            <button onclick="clearAll()" class="clear">ሁሉንም አጥፋ</button>
+        </div>
+        
+        <div class="button-group">
+            <button onclick="addSamples()" id="sampleButton">ምሳሌ ጨምር</button>
+            <button onclick="printPage()" class="print">🖨️ አትም</button>
+        </div>
+    </div>
+
+    <!-- Template Page -->
+    <div class="container">
+        <div class="page" id="page1">
+            <!-- Cutting Guides -->
+            <div class="cutting-guides">
+                <div class="vertical-guide"></div>
+                <div class="horizontal-guide guide-1"></div>
+                <div class="horizontal-guide guide-2"></div>
+                <div class="horizontal-guide guide-3"></div>
+                <div class="horizontal-guide guide-4"></div>
+                
+                <div class="corner-mark top-left"></div>
+                <div class="corner-mark top-right"></div>
+                <div class="corner-mark bottom-left"></div>
+                <div class="corner-mark bottom-right"></div>
+            </div>
+
+            <!-- Cards Grid -->
+            <div class="cards-grid" id="cardsGrid">
+                <!-- Cards will be added here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const MAX_VERSES = 10;
+        let verses = [];
+        let cardCount = 1;
+
+        // DOM elements
+        const elements = {
+            counter: document.getElementById('verseCounter'),
+            title: document.getElementById('verseTitle'),
+            content: document.getElementById('verseContent'),
+            addButton: document.getElementById('addButton'),
+            sampleButton: document.getElementById('sampleButton'),
+            grid: document.getElementById('cardsGrid'),
+            controls: document.getElementById('controlsPanel')
+        };
+
+        function createCard(verse) {
+            return `
+                <div class="card">
+                    <div class="card-title">${verse.title}</div>
+                    <div class="card-content">${verse.content}</div>
+                </div>
+            `;
+        }
+
+        function updateCounter() {
+            const count = verses.length;
+            const remaining = MAX_VERSES - count;
+            
+            elements.counter.textContent = `ጥቅሶች: ${count}/${MAX_VERSES}`;
+            
+            if (count === 0) {
+                elements.counter.className = 'counter normal';
+            } else if (count < MAX_VERSES) {
+                elements.counter.className = 'counter warning';
+                elements.counter.textContent += ` (${remaining} ቀርቷል)`;
+            } else {
+                elements.counter.className = 'counter full';
+                elements.counter.textContent += ' (ፍጹም!)';
+            }
+            
+            elements.addButton.disabled = count >= MAX_VERSES;
+            elements.sampleButton.disabled = count >= MAX_VERSES;
+        }
+
+        function updateGrid() {
+            elements.grid.innerHTML = verses.map(verse => createCard(verse)).join('');
+        }
+
+        function addVerse() {
+            if (verses.length >= MAX_VERSES) {
+                alert('❌ ከፍተኛ ገደብ ደርሷል! 10 ጥቅሶች ብቻ።');
+                return;
+            }
+            
+            const title = elements.title.value.trim();
+            const content = elements.content.value.trim();
+            
+            if (!content) {
+                alert('እባክዎ ጥቅሱን ያስገቡ!');
+                return;
+            }
+            
+            const verse = {
+                title: title || `ቅዱስ ጥቅስ ${cardCount}`,
+                content: content
+            };
+            
+            verses.push(verse);
+            updateGrid();
+            updateCounter();
+            cardCount++;
+            
+            // Clear content field but keep title
+            elements.content.value = '';
+            elements.content.focus();
+        }
+
+        function addSamples() {
+            if (verses.length >= MAX_VERSES) {
+                alert('❌ ከፍተኛ ገደብ ደርሷል!');
+                return;
+            }
+            
+            const available = MAX_VERSES - verses.length;
+            const toAdd = Math.min(2, available);
+            
+            if (toAdd === 0) {
+                alert('ምንም ቦታ አልቀረም!');
+                return;
+            }
+            
+            const samples = [
+                {
+                    title: "Evan Week (Mon - Fri)",
+                    content: '"የኃጢአት ደመወዝ ሞት ነውና፤ የእግዚአብሔር የጸጋ ስጦታ ግን በክርስቶስ ኢየሱስ በጌታችን የዘላለም ሕይወት ነው።"'
+                },
+                {
+                    title: "Evan Week (Mon - Fri)",
+                    content: '"ነገር ግን እግዚአብሔር በምሕረቱ ባለ ጠጋ ስለ ሆነ፥ ከወደደን ከትልቅ ፍቅሩ የተነሣ በበደላችን ሙታን እንኳ በሆንን ጊዜ ከክርስቶስ ጋር ሕይወት ሰጠን፥ በጸጋ ድናችኋልና፥"'
+                }
+            ];
+            
+            for (let i = 0; i < toAdd; i++) {
+                verses.push(samples[i]);
+            }
+            
+            updateGrid();
+            updateCounter();
+            alert(`${toAdd} ምሳሌ ጥቅሶች ተጨምረዋል!`);
+        }
+
+        function clearAll() {
+            if (confirm('ሁሉንም ጥቅሶች ማጥፋት ይፈልጋሉ?')) {
+                verses = [];
+                cardCount = 1;
+                updateGrid();
+                updateCounter();
+                elements.title.value = "Evan Week (Mon - Fri)";
+                elements.content.value = '';
+            }
+        }
+
+        function printPage() {
+            if (verses.length === 0) {
+                alert('እባክዎ በመጀመሪያ ጥቅሶችን ያስገቡ!');
+                return;
+            }
+            
+            // Force a reflow to ensure print styles are applied
+            document.body.focus();
+            window.print();
+        }
+
+        function toggleControls() {
+            elements.controls.style.display = elements.controls.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCounter();
+            elements.content.focus();
+            
+            // Auto-hide controls on mobile
+            if (window.innerWidth < 768) {
+                elements.controls.style.display = 'none';
+            }
+            
+            // Enter key to add verse
+            elements.content.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                    e.preventDefault();
+                    addVerse();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
